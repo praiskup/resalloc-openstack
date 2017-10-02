@@ -28,3 +28,9 @@ parser.add_argument(
     "name",
     help="Name of the VM to be terminated",
 )
+
+parser.add_argument(
+    "--delete-everything",
+    action='store_true',
+    help="delete also attached floating IPs or cinder volumes",
+)

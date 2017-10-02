@@ -20,21 +20,30 @@ from time import sleep
 
 from .arg_parser import parser
 
-from resalloc_nova.helpers import nova, neutron
+from resalloc_nova.helpers import nova, neutron, get_log
+
+log = get_log(__name__)
 
 def main():
     args = parser.parse_args()
-    server = nova.servers.find(name=args.name)
+    servers = nova.servers.findall(name=args.name)
+    if not servers:
+        servers = nova.servers.findall(id=args.name)
 
-    # Find the first floating ip address.
-    address = None
-    for key in server.addresses:
-        for a in server.addresses[key]:
-            if a['OS-EXT-IPS:type'] == 'floating':
-                address = a['addr']
+    if not servers:
+        log.error("server " + args.name + " not found")
+    server = servers[0]
 
-    for a in neutron.list_floatingips()['floatingips']:
-        if a['floating_ip_address'] == address:
-            neutron.delete_floatingip(a['id'])
+    if args.delete_everything:
+        # Find the first floating ip address.
+        address = None
+        for key in server.addresses:
+            for a in server.addresses[key]:
+                if a['OS-EXT-IPS:type'] == 'floating':
+                    address = a['addr']
+
+        for a in neutron.list_floatingips()['floatingips']:
+            if a['floating_ip_address'] == address:
+                neutron.delete_floatingip(a['id'])
 
     nova.servers.delete(server)
