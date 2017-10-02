@@ -19,4 +19,22 @@ import logging
 from time import sleep
 
 from .arg_parser import parser
-from resalloc_nova.env_credentials import session
+
+from resalloc_nova.helpers import nova, neutron
+
+def main():
+    args = parser.parse_args()
+    server = nova.servers.find(name=args.name)
+
+    # Find the first floating ip address.
+    address = None
+    for key in server.addresses:
+        for a in server.addresses[key]:
+            if a['OS-EXT-IPS:type'] == 'floating':
+                address = a['addr']
+
+    for a in neutron.list_floatingips()['floatingips']:
+        if a['floating_ip_address'] == address:
+            neutron.delete_floatingip(a['id'])
+
+    nova.servers.delete(server)

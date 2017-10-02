@@ -26,5 +26,5 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument(
     "name",
-    help="Name of the VM to be terminated")
+    help="Name of the VM to be terminated",
 )

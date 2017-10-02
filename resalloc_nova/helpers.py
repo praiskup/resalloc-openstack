@@ -2,6 +2,13 @@ import string
 import random
 import logging
 
+from novaclient import client as nova_client
+from neutronclient.v2_0 import client as neutron_client
+
+from resalloc_nova.env_credentials import session
+
+neutron = neutron_client.Client(session=session)
+nova = nova_client.Client(2, session=session)
 
 def get_log(name):
     logging.basicConfig(level=logging.INFO)

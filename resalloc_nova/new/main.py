@@ -53,7 +53,7 @@ def main():
         key = nova.keypairs.find()
 
         vm_stub = nova.servers.create(
-            random_id(),
+            args.name or random_id(),
             args.image,
             args.flavor,
             key_name=key.id,
