@@ -19,17 +19,13 @@ from time import sleep
 
 from .arg_parser import parser
 from resalloc_openstack.env_credentials import session
-from novaclient import client as nova_client
-from neutronclient.v2_0 import client as neutron_client
-from resalloc_openstack.helpers import FloatingIP, random_id, Server, get_log
+from resalloc_openstack.helpers import FloatingIP, random_id, Server, get_log, Volume
+from resalloc_openstack.helpers import cinder, nova, neutron
 
 log = get_log(__name__)
 
 # Cleaned up in alphabetical order.
 cleanup_items = {}
-
-neutron = neutron_client.Client(session=session)
-nova = nova_client.Client(2, session=session)
 
 def cleanup():
     log.info("running cleanup")
@@ -43,17 +39,25 @@ def cleanup():
 def main():
     try:
         args = parser.parse_args()
+        server_name = args.name or random_id()
         ip = None
         if args.floating_ip_network:
             ip = FloatingIP(neutron, args.floating_ip_network)
             cleanup_items['01_IP'] = ip
             print(ip)
 
+        number = 0
+        for v in args.volumes:
+            number += 1
+            volume_name = "{0}_{1}".format(server_name, number)
+            volume = cinder.volumes.create(size=int(v), name=volume_name)
+            cleanup_items['10_' + volume_name] = Volume(cinder, volume.id)
+
         flavor = nova.flavors.find(id=args.flavor)
         key = nova.keypairs.find()
 
         vm_stub = nova.servers.create(
-            args.name or random_id(),
+            server_name,
             args.image,
             args.flavor,
             key_name=key.id,

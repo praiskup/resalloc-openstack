@@ -4,11 +4,13 @@ import logging
 
 from novaclient import client as nova_client
 from neutronclient.v2_0 import client as neutron_client
+from cinderclient import client as cinder_client
 
 from resalloc_openstack.env_credentials import session
 
 neutron = neutron_client.Client(session=session)
 nova = nova_client.Client(2, session=session)
+cinder = cinder_client.Client(2, session=session)
 
 def get_log(name):
     logging.basicConfig(level=logging.INFO)
@@ -58,3 +60,12 @@ class Server(OSObject):
 
     def delete(self):
         self.client.servers.delete(self.id)
+
+
+class Volume(OSObject):
+    def __init__(self, client, id):
+        self.id = id
+        self.client = client
+
+    def delete(self):
+        self.client.volumes.delete(self.id)

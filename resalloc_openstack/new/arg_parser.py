@@ -44,3 +44,10 @@ parser.add_argument(
     required=True,
     help="openstack flavor, see 'nova flavor-list'",
 )
+
+parser.add_argument(
+    "--alloc-volume",
+    action='append',
+    dest='volumes',
+    help="allocate volumes by cinder",
+)
