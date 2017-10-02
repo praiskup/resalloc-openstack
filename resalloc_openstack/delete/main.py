@@ -14,13 +14,8 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import signal
-import logging
-from time import sleep
-
 from .arg_parser import parser
-
-from resalloc_nova.helpers import nova, neutron, get_log
+from resalloc_openstack.helpers import nova, neutron, get_log
 
 log = get_log(__name__)
 

@@ -5,7 +5,7 @@ import logging
 from novaclient import client as nova_client
 from neutronclient.v2_0 import client as neutron_client
 
-from resalloc_nova.env_credentials import session
+from resalloc_openstack.env_credentials import session
 
 neutron = neutron_client.Client(session=session)
 nova = nova_client.Client(2, session=session)
@@ -16,7 +16,7 @@ def get_log(name):
 
 
 def random_id():
-    return "resalloc_nova_" \
+    return "resalloc_openstack_" \
         + ''.join(random.choice(string.ascii_uppercase + string.digits) \
             for _ in range(10))
 

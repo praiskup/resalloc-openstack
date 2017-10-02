@@ -18,10 +18,10 @@ import signal
 from time import sleep
 
 from .arg_parser import parser
-from resalloc_nova.env_credentials import session
+from resalloc_openstack.env_credentials import session
 from novaclient import client as nova_client
 from neutronclient.v2_0 import client as neutron_client
-from resalloc_nova.helpers import FloatingIP, random_id, Server, get_log
+from resalloc_openstack.helpers import FloatingIP, random_id, Server, get_log
 
 log = get_log(__name__)
 
