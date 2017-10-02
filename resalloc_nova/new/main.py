@@ -72,7 +72,8 @@ def main():
             sleep(3)
 
         # Server booted!  Assign the IP.
-        server.add_floating_ip(ip.ip)
+        if ip:
+            server.add_floating_ip(ip.ip)
 
     except:
         signal.signal(signal.SIGINT, signal.SIG_IGN)
