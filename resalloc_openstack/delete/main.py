@@ -14,8 +14,10 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from sys import exit
 from .arg_parser import parser
 from resalloc_openstack.helpers import nova, neutron, get_log
+from time import sleep
 
 log = get_log(__name__)
 
@@ -26,8 +28,11 @@ def main():
         servers = nova.servers.findall(id=args.name)
 
     if not servers:
-        log.error("server " + args.name + " not found")
+        log.fatal("server " + args.name + " not found")
+        exit(1)
+
     server = servers[0]
+    postpone_volume_deletes = []
 
     if args.delete_everything:
         # Find the first floating ip address.
@@ -39,6 +44,18 @@ def main():
 
         for a in neutron.list_floatingips()['floatingips']:
             if a['floating_ip_address'] == address:
+                log.info("deleting ip " + address)
                 neutron.delete_floatingip(a['id'])
 
+        for volume in nova.volumes.get_server_volumes(server.id):
+            log.info("deleting volume " + volume.id)
+            postpone_volume_deletes.append(volume.id)
+
+    log.debug("deleting server " + server.id)
     nova.servers.delete(server)
+    while nova.servers.findall(id=server.id):
+        sleep(3)
+
+    for volume_id in postpone_volume_deletes:
+        log.debug("deleting volume " + volume_id)
+        cinder.volumes.delete(volume_id)

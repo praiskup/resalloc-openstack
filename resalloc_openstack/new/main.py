@@ -47,10 +47,12 @@ def main():
             print(ip)
 
         number = 0
+        volumes = []
         for v in args.volumes:
             number += 1
             volume_name = "{0}_{1}".format(server_name, number)
             volume = cinder.volumes.create(size=int(v), name=volume_name)
+            volumes.append(volume)
             cleanup_items['10_' + volume_name] = Volume(cinder, volume.id)
 
         flavor = nova.flavors.find(id=args.flavor)
@@ -78,6 +80,10 @@ def main():
         # Server booted!  Assign the IP.
         if ip:
             server.add_floating_ip(ip.ip)
+
+        for volume in volumes:
+            log.debug("attaching volume " + volume.id)
+            cinder.volumes.attach(volume, server.id, '/dev/vda')
 
     except:
         signal.signal(signal.SIGINT, signal.SIG_IGN)

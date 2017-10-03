@@ -13,8 +13,10 @@ nova = nova_client.Client(2, session=session)
 cinder = cinder_client.Client(2, session=session)
 
 def get_log(name):
-    logging.basicConfig(level=logging.INFO)
-    return logging.getLogger(name)
+    level = logging.DEBUG
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    return logger
 
 
 def random_id():
