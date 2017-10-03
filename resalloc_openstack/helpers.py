@@ -1,6 +1,7 @@
 import string
 import random
 import logging
+from time import sleep
 
 from novaclient import client as nova_client
 from neutronclient.v2_0 import client as neutron_client
@@ -19,6 +20,8 @@ def get_log(name):
     return logger
 
 
+log = get_log(__name__)
+
 def random_id():
     return "resalloc_openstack_" \
         + ''.join(random.choice(string.ascii_uppercase + string.digits) \
@@ -26,6 +29,16 @@ def random_id():
 
 
 class OSObject(object):
+    def best_effort_delete(self):
+        for _ in range(0, 5):
+            try:
+                self.delete()
+                break
+            except:
+                log.debug("delete attempt failed")
+                sleep(5)
+
+
     def delete(self):
         raise NotImplementedError
 
@@ -61,7 +74,11 @@ class Server(OSObject):
         self.client = client
 
     def delete(self):
+        log.debug("deleting server " + self.id)
         self.client.servers.delete(self.id)
+        # Wait for the server shut-down before we attempt to delete volumes.
+        while self.client.servers.findall(id=self.id):
+            sleep(2)
 
 
 class Volume(OSObject):

@@ -30,9 +30,9 @@ cleanup_items = {}
 def cleanup():
     log.info("running cleanup")
     for key, obj in sorted(cleanup_items.items()):
-        log.info("cleaning " + key)
+        log.debug("cleaning " + key)
         try:
-            obj.delete()
+            obj.best_effort_delete()
         except Exception as e:
             log.exception("can't delete " + key)
 

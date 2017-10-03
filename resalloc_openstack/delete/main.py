@@ -51,10 +51,7 @@ def main():
             log.info("deleting volume " + volume.id)
             postpone_volume_deletes.append(volume.id)
 
-    log.debug("deleting server " + server.id)
-    nova.servers.delete(server)
-    while nova.servers.findall(id=server.id):
-        sleep(3)
+    Server(nova, server.id).delete()
 
     for volume_id in postpone_volume_deletes:
         log.debug("deleting volume " + volume_id)
