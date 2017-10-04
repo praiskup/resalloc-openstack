@@ -16,8 +16,13 @@
 
 import argparse
 
-description = """Start a new VM in openstack, with some dependant resources
-(swap volumes or floating IPs ATM).  Print IP of the VM.
+description = """
+Start a new VM in openstack, with some dependant resources (swap volumes or
+floating IPs ATM).
+
+The important thing is that the script aims to behave as atomically as possible,
+in a sense that either everything is allocated as requested, or the script fails
+(without any leftovers).
 """
 
 parser = argparse.ArgumentParser(
@@ -50,4 +55,15 @@ parser.add_argument(
     action='append',
     dest='volumes',
     help="allocate volumes by cinder",
+)
+
+parser.add_argument(
+    "--post-command",
+    dest='command',
+    help=\
+"""
+run COMMAND after VM is started, and fail if the script fails too.  The
+variables RESALLOC_OS_NAME and RESALLOC_OS_IP are exported into environment of
+those scripts.
+""".strip(),
 )

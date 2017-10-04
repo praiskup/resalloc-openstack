@@ -14,46 +14,37 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import signal
+import os
 from time import sleep
 
 from .arg_parser import parser
 from resalloc_openstack.env_credentials import session
-from resalloc_openstack.helpers import FloatingIP, random_id, Server, get_log, Volume
+from resalloc_openstack.helpers \
+        import FloatingIP, random_id, Server, get_log, Volume, GarbageCollector
 from resalloc_openstack.helpers import cinder, nova, neutron
+from subprocess import check_call
 
 log = get_log(__name__)
 
-# Cleaned up in alphabetical order.
-cleanup_items = {}
-
-def cleanup():
-    log.info("running cleanup")
-    for key, obj in sorted(cleanup_items.items()):
-        log.debug("cleaning " + key)
-        try:
-            obj.best_effort_delete()
-        except Exception as e:
-            log.exception("can't delete " + key)
-
+gc = GarbageCollector()
 def main():
+    args = parser.parse_args()
+    server_name = args.name or random_id()
+
     try:
-        args = parser.parse_args()
-        server_name = args.name or random_id()
         ip = None
         if args.floating_ip_network:
             ip = FloatingIP(neutron, args.floating_ip_network)
-            cleanup_items['01_IP'] = ip
-            print(ip)
+            gc.add('01_IP', ip)
 
         number = 0
         volumes = []
-        for v in args.volumes:
+        for v in args.volumes or []:
             number += 1
             volume_name = "{0}_{1}".format(server_name, number)
             volume = cinder.volumes.create(size=int(v), name=volume_name)
             volumes.append(volume)
-            cleanup_items['10_' + volume_name] = Volume(cinder, volume.id)
+            gc.add('05_' + volume_name, Volume(cinder, volume))
 
         flavor = nova.flavors.find(id=args.flavor)
         key = nova.keypairs.find()
@@ -65,7 +56,7 @@ def main():
             key_name=key.id,
         )
 
-        cleanup_items['05_server'] = Server(nova, vm_stub.id)
+        gc.add('10_server', Server(nova, vm_stub.id))
 
         server = None
         while True:
@@ -85,7 +76,14 @@ def main():
             log.debug("attaching volume " + volume.id)
             cinder.volumes.attach(volume, server.id, '/dev/vda')
 
+        if args.command:
+            env = os.environ
+            env['RESALLOC_OS_NAME'] = server_name
+            env['RESALLOC_OS_IP'] = ip.ip
+            check_call(args.command, env=env, shell=True)
+
     except:
-        signal.signal(signal.SIGINT, signal.SIG_IGN)
-        cleanup()
+        gc.do()
         raise
+
+    return 0

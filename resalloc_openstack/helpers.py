@@ -1,3 +1,20 @@
+# Copyright (C) 2017 Red Hat, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+import signal
 import string
 import random
 import logging
@@ -48,30 +65,44 @@ class FloatingIP(OSObject):
     id = ""
     client = None
 
-    def __init__(self, client=None, network_id=None):
+    def __init__(self, client=None, network_id=None, ip=None):
         assert client
-        assert network_id
+        assert network_id or ip
 
         self.client = client
 
-        body = {'floatingip': {'floating_network_id': network_id}}
-        response = client.create_floatingip(body)
+        if ip:
+            self.id = ip['id']
+            self.ip = ip['floating_ip_address']
 
-        self.ip = response['floatingip']['floating_ip_address']
-        self.id = response['floatingip']['id']
+        else:
+            body = {'floatingip': {'floating_network_id': network_id}}
+            response = client.create_floatingip(body)
+
+            self.ip = response['floatingip']['floating_ip_address']
+            self.id = response['floatingip']['id']
 
     def __str__(self):
         return self.ip
-
 
     def delete(self):
         self.client.delete_floatingip(self.id)
 
 
 class Server(OSObject):
-    def __init__(self, client, id):
-        self.id = id
+    nova_o = None
+
+    def __init__(self, client, id_or_name):
         self.client = client
+
+        srvs = client.servers.findall(name=id_or_name)
+        if srvs:
+            self.id = srvs[0].id
+            self.nova_o = srvs[0]
+        else:
+            # "assert"
+            self.nova_o = client.servers.find(id=id_or_name)
+            self.id = id_or_name
 
     def delete(self):
         log.debug("deleting server " + self.id)
@@ -82,9 +113,32 @@ class Server(OSObject):
 
 
 class Volume(OSObject):
-    def __init__(self, client, id):
-        self.id = id
+    def __init__(self, client, volume):
+        self.id = volume.id
+        self.nova_o = volume
         self.client = client
 
     def delete(self):
+        # TODO:
+        try:
+            self.nova_o.detach()
+        except:
+            log.debug("can't detach volume " + self.id)
+
         self.client.volumes.delete(self.id)
+
+
+class GarbageCollector(object):
+    todo = {}
+    def add(self, item, obj):
+        self.todo[item] = obj
+
+    def do(self):
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+        log.debug("running cleanup")
+        for key, obj in sorted(self.todo.items()):
+            log.debug("cleaning " + key)
+            try:
+                obj.best_effort_delete()
+            except Exception as e:
+                log.exception("can't delete " + key)

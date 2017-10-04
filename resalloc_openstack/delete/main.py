@@ -16,43 +16,51 @@
 
 from sys import exit
 from .arg_parser import parser
-from resalloc_openstack.helpers import nova, neutron, get_log
+from resalloc_openstack.helpers \
+    import nova, cinder, neutron, get_log, Server, FloatingIP,\
+           GarbageCollector, Volume
 from time import sleep
 
 log = get_log(__name__)
 
-def main():
+
+def cleanup(gc):
     args = parser.parse_args()
-    servers = nova.servers.findall(name=args.name)
-    if not servers:
-        servers = nova.servers.findall(id=args.name)
 
-    if not servers:
-        log.fatal("server " + args.name + " not found")
-        exit(1)
-
-    server = servers[0]
-    postpone_volume_deletes = []
+    server = Server(nova, args.name)
 
     if args.delete_everything:
         # Find the first floating ip address.
-        address = None
-        for key in server.addresses:
-            for a in server.addresses[key]:
+        addresses = []
+        for key in server.nova_o.addresses:
+            for a in server.nova_o.addresses[key]:
                 if a['OS-EXT-IPS:type'] == 'floating':
-                    address = a['addr']
+                    addresses.append(a['addr'])
 
         for a in neutron.list_floatingips()['floatingips']:
-            if a['floating_ip_address'] == address:
-                log.info("deleting ip " + address)
-                neutron.delete_floatingip(a['id'])
+            address = a['floating_ip_address']
+            if address in addresses:
+                gc.add('01_ip_' + address,
+                       FloatingIP(client=neutron, ip=a))
 
-        for volume in nova.volumes.get_server_volumes(server.id):
-            log.info("deleting volume " + volume.id)
-            postpone_volume_deletes.append(volume.id)
+        for volume in cinder.volumes.list():
+            if not volume.attachments:
+                continue
 
-    Server(nova, server.id).delete()
+            # FIXME: do we need to check IDs != 0?
+            if volume.attachments[0]['server_id'] != server.id:
+                continue
 
-    for volume_id in postpone_volume_deletes:
-        log.debug("deleting volume " + volume_id)
-        cinder.volumes.delete(volume_id)
+            gc.add('05_volume_' + volume.id,
+                   Volume(cinder, volume))
+
+    gc.add('10_server', server)
+
+
+def main():
+    gc = GarbageCollector()
+    try:
+        cleanup(gc)
+    finally:
+        gc.do()
+    return 0
