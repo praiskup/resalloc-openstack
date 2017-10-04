@@ -1,0 +1,4 @@
+noarch/
+resalloc-openstack*/
+*.src.rpm
+*.tar.gz

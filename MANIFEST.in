@@ -1,2 +1,3 @@
+include COPYING
 include requirements.txt
 recursive-include build_manpages/build_manpages *.py
