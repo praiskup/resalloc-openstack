@@ -26,8 +26,12 @@ in a sense that either everything is allocated as requested, or the script fails
 """
 
 parser = argparse.ArgumentParser(
+    prog='resalloc-openstack-new',
     description=description,
 )
+
+parser.man_short_description \
+        = "atomically allocate VM with additional resources in openstack"
 
 parser.add_argument(
     "--name",

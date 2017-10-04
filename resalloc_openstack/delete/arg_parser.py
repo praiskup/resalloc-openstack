@@ -21,8 +21,12 @@ Terminate VM started by resalloc-nova-new including all resources
 """.strip()
 
 parser = argparse.ArgumentParser(
+    prog='resalloc-openstack-delete',
     description=description,
 )
+
+parser.man_short_description \
+        = "drop resources allocated by resalloc-openstack-new"
 
 parser.add_argument(
     "name",
