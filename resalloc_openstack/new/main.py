@@ -68,9 +68,18 @@ def main():
             log.debug("status: " + str(status))
             sleep(3)
 
+        ipaddr = None
         # Server booted!  Assign the IP.
         if ip:
             server.add_floating_ip(ip.ip)
+            ipaddr = ip.ip
+        else:
+            for net_id in server.addresses:
+                for ip in server.addresses[net_id]:
+                    ipaddr = ip['addr']
+                    break
+                if ipaddr:
+                    break
 
         for volume in volumes:
             log.debug("attaching volume " + volume.id)
@@ -79,8 +88,11 @@ def main():
         if args.command:
             env = os.environ
             env['RESALLOC_OS_NAME'] = server_name
-            env['RESALLOC_OS_IP'] = ip.ip
+            env['RESALLOC_OS_IP'] = ipaddr
             check_call(args.command, env=env, shell=True)
+
+        if args.print_ip:
+            print(ipaddr)
 
     except:
         gc.do()

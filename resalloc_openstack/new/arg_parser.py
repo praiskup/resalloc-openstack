@@ -71,3 +71,9 @@ variables RESALLOC_OS_NAME and RESALLOC_OS_IP are exported into environment of
 those scripts.
 """.strip(),
 )
+
+parser.add_argument(
+    "--print-ip",
+    action="store_true",
+    help="after successful allocation, print IP on standard output",
+)
