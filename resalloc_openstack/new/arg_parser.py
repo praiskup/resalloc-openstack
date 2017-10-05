@@ -77,3 +77,8 @@ parser.add_argument(
     action="store_true",
     help="after successful allocation, print IP on standard output",
 )
+
+parser.add_argument(
+    "--key-pair-id",
+    help="use specific key, see ids (== names) in `nova keypair-list`",
+)

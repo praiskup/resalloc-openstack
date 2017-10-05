@@ -47,13 +47,18 @@ def main():
             gc.add('05_' + volume_name, Volume(cinder, volume))
 
         flavor = nova.flavors.find(id=args.flavor)
-        key = nova.keypairs.find()
+
+        if args.key_pair_id:
+            key = args.key_pair_id
+        else:
+            key = nova.keypairs.find()
+            key = key.id
 
         vm_stub = nova.servers.create(
             server_name,
             args.image,
             args.flavor,
-            key_name=key.id,
+            key_name=key,
         )
 
         gc.add('10_server', Server(nova, vm_stub.id))

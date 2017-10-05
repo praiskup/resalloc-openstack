@@ -17,7 +17,7 @@
 Name:       %srcname
 Summary:    Resource allocator scripts for OpenStack
 Version:    0%{?postrel}
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    GPLv2+
 URL:        https://github.com/praiskup/resalloc-openstack
 BuildArch:  noarch
@@ -68,6 +68,9 @@ Resource allocator spawner/terminator scripts for OpenStack
 
 
 %changelog
+* Thu Oct 05 2017 Pavel Raiskup <praiskup@redhat.com> - 0.dev0-2
+- new: add --key-pair-id option
+
 * Thu Oct 05 2017 Pavel Raiskup <praiskup@redhat.com> - 0.dev0-1
 - add handler explicitly for python2
 
