@@ -34,6 +34,9 @@ def get_log(name):
     level = logging.DEBUG
     logger = logging.getLogger(name)
     logger.setLevel(level)
+    stderr = logging.StreamHandler()
+    stderr.setLevel(level)
+    logger.addHandler(stderr)
     return logger
 
 
