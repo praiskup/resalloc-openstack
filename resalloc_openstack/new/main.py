@@ -88,7 +88,7 @@ def main():
 
         for volume in volumes:
             log.debug("attaching volume " + volume.id)
-            cinder.volumes.attach(volume, server.id, '/dev/vda')
+            nova.volumes.create_server_volume(server.id, volume.id)
 
         if args.command:
             env = os.environ
