@@ -54,11 +54,23 @@ def main():
             key = nova.keypairs.find()
             key = key.id
 
+        nics = None
+        if args.nics:
+            nics = []
+            for nic in args.nics:
+                nic_dict = {}
+                nic_args = nic.split(',')
+                for arg in nic_args:
+                    k, v = arg.split('=')
+                    nic_dict[k] = v
+                nics.append(nic_dict)
+
         vm_stub = nova.servers.create(
             server_name,
             args.image,
             args.flavor,
             key_name=key,
+            nics=nics,
         )
 
         gc.add('10_server', Server(nova, vm_stub.id))

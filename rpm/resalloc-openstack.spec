@@ -17,7 +17,7 @@
 Name:       %srcname
 Summary:    Resource allocator scripts for OpenStack
 Version:    0%{?postrel}
-Release:    3%{?dist}
+Release:    4%{?dist}
 License:    GPLv2+
 URL:        https://github.com/praiskup/resalloc-openstack
 BuildArch:  noarch
@@ -68,6 +68,9 @@ Resource allocator spawner/terminator scripts for OpenStack
 
 
 %changelog
+* Wed Jan 10 2018 Pavel Raiskup <praiskup@redhat.com> - 0.dev0-4
+- add 'resalloc-openstack --nic' option
+
 * Fri Oct 13 2017 Pavel Raiskup <praiskup@redhat.com> - 0.dev0-3
 - fix the volume attaching
 

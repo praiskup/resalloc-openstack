@@ -82,3 +82,11 @@ parser.add_argument(
     "--key-pair-id",
     help="use specific key, see ids (== names) in `nova keypair-list`",
 )
+
+parser.add_argument(
+    "--nic",
+    action='append',
+    dest='nics',
+    help="comma-separated, key=value,foo=baz arguments (see "
+         "nova.servers.create(nics=...) help",
+)
