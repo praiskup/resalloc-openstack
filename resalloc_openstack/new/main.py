@@ -65,9 +65,11 @@ def main():
                     nic_dict[k] = v
                 nics.append(nic_dict)
 
+        image = nova.glance.find_image(args.image)
+
         vm_stub = nova.servers.create(
             server_name,
-            args.image,
+            image.id,
             args.flavor,
             key_name=key,
             nics=nics,

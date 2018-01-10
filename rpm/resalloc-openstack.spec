@@ -70,6 +70,7 @@ Resource allocator spawner/terminator scripts for OpenStack
 %changelog
 * Wed Jan 10 2018 Pavel Raiskup <praiskup@redhat.com> - 0.dev0-4
 - add 'resalloc-openstack --nic' option
+- 'resalloc-openstack-new --image' accepts image name, too
 
 * Fri Oct 13 2017 Pavel Raiskup <praiskup@redhat.com> - 0.dev0-3
 - fix the volume attaching
