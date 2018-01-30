@@ -1,0 +1,57 @@
+Allocate (all-or-nothing) machine in Open Stack
+===============================================
+
+When allocating machine in Open Stack (OS) from command-line, there are usually
+several OS API end-points to talk to (nova, cinder, neutron, ...), and pretty
+non-trivial process to follow to get all the pieces together (assign floating
+point IP, persistent storage, execute spin-up custom script).  Several commands
+are pretty hard to maintain, and that's not what most of the real-world
+scripting want --- single command which either does completely everything (or
+fails and thus it does "nothing" -> garbage collects all the leftovers).  That's
+where `resalloc-openstack-new` scripts helps.  The counterpart is
+`resalloc-openstack-delete`.
+
+Basic usage
+-----------
+
+Even though this project is tightly related to [1] resalloc project, it might be
+useful to anybody:
+
+    1. export all the $OS_* variables into your environment (OS_TENANT_ID,
+       OS_PROJECT_NAME, OS_USERNAME, ...), for more info see the "Access &
+       Security -> API Access -> Download Openstack RC File" button
+       in your OS dashboard or docs [2].
+
+    2. $ resalloc-openstack-new                                     \
+            --image            7e9febc7-24f3-41ee-8fbc-5c85b0e35f3c \
+            --floating-ip-from c29a0c92-6721-4e83-b9b4-d1a2c7d11495 \
+            --flavor           3                                    \
+            --name             SERVER_NAME                          \
+            --key-pair-id      your-keypair-name-or-id              \
+            --alloc-volume     16                                   \
+            --post-command     execute-this-command-once-booted.sh  \
+            --print-ip
+       status: BUILD
+       status: BUILD
+       ...
+       booted server ad7a1782-c475-4173-bb7b-8bb85488e44a
+       10.8.248.215
+
+       The only stdout output is the server IP address.
+
+    3. $ resalloc-openstack-delete \
+                --delete-everything \
+                ad7a1782-c475-4173-bb7b-8bb85488e44a
+       running cleanup
+       cleaning 01_ip_10.8.248.215
+       cleaning 10_server
+       deleting server ad7a1782-c475-4173-bb7b-8bb85488e44a
+
+    4. See $ resalloc-openstack-new --help
+
+
+References
+----------
+
+[1] https://github.com/praiskup/resalloc
+[2] https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux_OpenStack_Platform/5/html/End_User_Guide/cli_openrc.html

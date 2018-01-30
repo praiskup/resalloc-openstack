@@ -1,6 +1,5 @@
 %global srcname resalloc-openstack
 %global pkgname resalloc_openstack
-%global postrel .dev0
 
 %if 0%{?fedora} || 0%{?rhel} > 7
 %bcond_with python2
@@ -16,8 +15,8 @@
 
 Name:       %srcname
 Summary:    Resource allocator scripts for OpenStack
-Version:    0%{?postrel}
-Release:    4%{?dist}
+Version:    1
+Release:    0%{?dist}
 License:    GPLv2+
 URL:        https://github.com/praiskup/resalloc-openstack
 BuildArch:  noarch
@@ -61,6 +60,7 @@ Resource allocator spawner/terminator scripts for OpenStack
 
 %files
 %license COPYING
+%doc README
 %{_bindir}/%{name}-*
 %_mandir/man1/%{name}-*.1*
 %{default_sitelib}/%{pkgname}
@@ -68,6 +68,9 @@ Resource allocator spawner/terminator scripts for OpenStack
 
 
 %changelog
+* Tue Jan 30 2018 Pavel Raiskup <praiskup@redhat.com> - 1.dev0-0
+- first tagged release
+
 * Wed Jan 10 2018 Pavel Raiskup <praiskup@redhat.com> - 0.dev0-4
 - add 'resalloc-openstack --nic' option
 - 'resalloc-openstack-new --image' accepts image name, too
