@@ -16,7 +16,7 @@
 Name:       %srcname
 Summary:    Resource allocator scripts for OpenStack
 Version:    1
-Release:    0%{?dist}
+Release:    1%{?dist}
 License:    GPLv2+
 URL:        https://github.com/praiskup/resalloc-openstack
 BuildArch:  noarch
@@ -68,6 +68,9 @@ Resource allocator spawner/terminator scripts for OpenStack
 
 
 %changelog
+* Wed Oct 31 2018 Pavel Raiskup <praiskup@redhat.com> - 1-1
+- rebuild for Python 3.7
+
 * Tue Jan 30 2018 Pavel Raiskup <praiskup@redhat.com> - 1.dev0-0
 - first tagged release
 
