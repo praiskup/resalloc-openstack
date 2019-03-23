@@ -1,5 +1,5 @@
 # Resalloc setup script.
-# Copyright (C) 2017 Red Hat, Inc.
+# Copyright (C) 2019 Red Hat, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ Resource allocator spawner/terminator scripts for OpenStack
 
 setup(
     name=project,
-    version='1',
+    version='2',
     description='Spawning/terminating scripts for openstack',
     long_description=long_description,
     author='Pavel Raiskup',
