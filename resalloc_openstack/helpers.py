@@ -21,6 +21,7 @@ import logging
 from time import sleep
 
 from novaclient import client as nova_client
+import novaclient.exceptions
 from neutronclient.v2_0 import client as neutron_client
 from cinderclient import client as cinder_client
 
@@ -67,7 +68,7 @@ class OSObject(object):
         except Exception as e:
             log.exception(e)
 
-        log.debug("failed to delte in #{0} attempt".format(self.attempt))
+        log.debug("failed to delete in #{0} attempt".format(self.attempt))
         return False
 
     def delete(self):
@@ -122,7 +123,11 @@ class Server(OSObject):
 
     def delete(self):
         log.debug("deleting server " + self.id)
-        self.client.servers.delete(self.id)
+
+        try:
+            self.client.servers.delete(self.id)
+        except novaclient.exceptions.NotFound:
+            return # deleted in the meantime, by previous attempt
 
         # Wait for the server shut-down before we attempt to delete volumes.
         for _ in range(5):
