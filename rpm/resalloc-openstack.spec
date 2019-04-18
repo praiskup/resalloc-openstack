@@ -16,7 +16,7 @@
 Name:       %srcname
 Summary:    Resource allocator scripts for OpenStack
 Version:    3
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    GPLv2+
 URL:        https://github.com/praiskup/resalloc-openstack
 BuildArch:  noarch
@@ -26,6 +26,8 @@ BuildRequires: %pythonpfx-devel
 BuildRequires: %pythonpfx-setuptools
 
 Requires: %pythonpfx-cinderclient
+Requires: %pythonpfx-glanceclient
+Requires: %pythonpfx-keystoneauth1
 Requires: %pythonpfx-neutronclient
 Requires: %pythonpfx-novaclient
 
@@ -68,6 +70,9 @@ Resource allocator spawner/terminator scripts for OpenStack
 
 
 %changelog
+* Thu Apr 18 2019 Pavel Raiskup <praiskup@redhat.com> - 3-2
+- add missing Requires
+
 * Thu Apr 18 2019 Pavel Raiskup <praiskup@redhat.com> - 3-1
 - more solid VM termination
 - dump verbosely what is going on
