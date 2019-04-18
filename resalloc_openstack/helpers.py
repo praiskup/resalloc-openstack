@@ -49,15 +49,22 @@ def random_id():
 
 
 class OSObject(object):
-    def best_effort_delete(self):
-        for _ in range(0, 5):
-            try:
-                self.delete()
-                break
-            except:
-                log.debug("delete attempt failed")
-                sleep(5)
+    attempt = 0
 
+    def best_effort_delete(self):
+        if self.attempt > 5:
+            # what else we can do ...
+            return True
+
+        self.attempt += 1
+        try:
+            self.delete()
+            return True
+        except Exception as e:
+            log.exception(e)
+
+        log.debug("failed to delte in #{0} attempt".format(self.attempt))
+        return False
 
     def delete(self):
         raise NotImplementedError
@@ -138,10 +145,16 @@ class GarbageCollector(object):
 
     def do(self):
         signal.signal(signal.SIGINT, signal.SIG_IGN)
-        log.debug("running cleanup")
-        for key, obj in sorted(self.todo.items()):
-            log.debug("cleaning " + key)
-            try:
-                obj.best_effort_delete()
-            except Exception as e:
-                log.exception("can't delete " + key)
+
+        if self.todo:
+            log.debug("running cleanup")
+
+        while self.todo:
+            action_id = sorted(self.todo)[0]
+            obj = self.todo[action_id]
+            log.debug("cleaning " + action_id)
+            if obj.best_effort_delete():
+                self.todo.pop(action_id)
+            else:
+                # Give it some time to recover
+                sleep(5)

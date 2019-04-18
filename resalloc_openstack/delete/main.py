@@ -19,15 +19,22 @@ from .arg_parser import parser
 from resalloc_openstack.helpers \
     import nova, cinder, neutron, get_log, Server, FloatingIP,\
            GarbageCollector, Volume
+import novaclient.exceptions
 from time import sleep
 
 log = get_log(__name__)
 
+from keystoneauth1.exceptions import ConnectionError
 
-def cleanup(gc):
+def gather_tasks(gc):
     args = parser.parse_args()
 
-    server = Server(nova, args.name)
+    try:
+        server = Server(nova, args.name)
+    except novaclient.exceptions.NotFound:
+        log.error('vm %s not found', args.name)
+        return False
+
 
     if args.delete_everything:
         # Find the first floating ip address.
@@ -37,7 +44,14 @@ def cleanup(gc):
                 if a['OS-EXT-IPS:type'] == 'floating':
                     addresses.append(a['addr'])
 
-        for a in neutron.list_floatingips()['floatingips']:
+
+        floating_ips = []
+        try:
+            floating_ips = neutron.list_floatingips()['floatingips']
+        except ConnectionError as err:
+            log.warning("can not access floatingIP API" + str(err))
+
+        for a in floating_ips:
             address = a['floating_ip_address']
             if address in addresses:
                 gc.add('01_ip_' + address,
@@ -58,9 +72,21 @@ def cleanup(gc):
 
 
 def main():
-    gc = GarbageCollector()
-    try:
-        cleanup(gc)
-    finally:
-        gc.do()
+    gathered = False
+    for _ in range(0, 5):
+        try:
+            gc = GarbageCollector()
+            gather_tasks(gc)
+            gathered = True
+            break
+        except Exception as e:
+            # we want to try to delete everything anyways
+            log.exception(e)
+            pass
+
+    if not gathered:
+        log.error("can't even gather info about the instance")
+        return 1
+
+    gc.do()
     return 0
