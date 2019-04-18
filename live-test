@@ -1,0 +1,34 @@
+#! /bin/sh
+
+set -e
+
+log() { echo "$*" >&2 ; }
+debug() { log "debug: $*" ; }
+fatal() { log "fatal: $*" ; exit 1 ;}
+
+test -n "$OS_AUTH_URL"
+
+config=.config/"$(echo "$OS_AUTH_URL" | sed 's|/|_|g')"
+debug "using config '$config'"
+test -f "$config" || fatal "$config not found"
+
+source "$config"
+
+eval "set -- $(pwgen 14)"
+vmname="resalloc-test-vm-$1"
+
+output=$(resalloc-openstack-new \
+    --image "$image" \
+    --flavor "$flavor" \
+    --name "$vmname" \
+    --alloc-volume 10 \
+    --print-ip \
+    --nic "$nic" \
+    --key-pair-id "$key"
+)
+
+echo "Ip address is $output"
+test $(echo "$output" | wc -l) -eq 1 || exit 1
+
+resalloc-openstack-delete \
+    --delete-everything "$vmname"
