@@ -68,6 +68,9 @@ Resource allocator spawner/terminator scripts for OpenStack
 
 
 %changelog
+* Thu Apr 18 2019 Pavel Raiskup <praiskup@redhat.com> - 3-1
+- more solid VM termination
+
 * Sat Mar 23 2019 Pavel Raiskup <praiskup@redhat.com> - 2-1
 - support v3 connection API
 

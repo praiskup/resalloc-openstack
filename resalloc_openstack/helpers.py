@@ -51,6 +51,10 @@ def random_id():
 class OSObject(object):
     attempt = 0
 
+    def __init__(self, *args, **kwargs):
+        log.debug("initializing " + str(self.__class__))
+        self.init(*args, **kwargs)
+
     def best_effort_delete(self):
         if self.attempt > 5:
             # what else we can do ...
@@ -69,13 +73,15 @@ class OSObject(object):
     def delete(self):
         raise NotImplementedError
 
+    def init(self):
+        raise NotImplementedError
 
 class FloatingIP(OSObject):
     ip = ""
     id = ""
     client = None
 
-    def __init__(self, client=None, network_id=None, ip=None):
+    def init(self, client=None, network_id=None, ip=None):
         assert client
         assert network_id or ip
 
@@ -102,7 +108,7 @@ class FloatingIP(OSObject):
 class Server(OSObject):
     nova_o = None
 
-    def __init__(self, client, id_or_name):
+    def init(self, client, id_or_name):
         self.client = client
 
         srvs = client.servers.findall(name=id_or_name)
@@ -123,7 +129,7 @@ class Server(OSObject):
 
 
 class Volume(OSObject):
-    def __init__(self, client, volume):
+    def init(self, client, volume):
         self.id = volume.id
         self.nova_o = volume
         self.client = client
