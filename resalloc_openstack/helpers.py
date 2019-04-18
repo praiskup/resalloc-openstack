@@ -123,9 +123,15 @@ class Server(OSObject):
     def delete(self):
         log.debug("deleting server " + self.id)
         self.client.servers.delete(self.id)
+
         # Wait for the server shut-down before we attempt to delete volumes.
-        while self.client.servers.findall(id=self.id):
-            sleep(2)
+        for _ in range(5):
+            sleep(5)
+            if not self.client.servers.findall(id=self.id):
+                return
+
+        raise Exception("delete request accepted, but errored")
+
 
 
 class Volume(OSObject):
