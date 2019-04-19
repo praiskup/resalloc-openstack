@@ -21,7 +21,7 @@ from .arg_parser import parser
 from resalloc_openstack.env_credentials import session
 from resalloc_openstack.helpers \
         import FloatingIP, random_id, Server, get_log, Volume, GarbageCollector
-from resalloc_openstack.helpers import cinder, nova, neutron
+from resalloc_openstack.helpers import cinder, nova, neutron, find_id_broken
 from subprocess import check_call
 
 log = get_log(__name__)
@@ -75,11 +75,17 @@ def main():
             nics=nics,
         )
 
-        gc.add('10_server', Server(nova, vm_stub.id))
+        if find_id_broken:
+            gc.add('10_server', Server(nova, server_name))
+        else:
+            gc.add('10_server', Server(nova, vm_stub.id))
 
         server = None
         while True:
-            server = nova.servers.find(id=vm_stub.id)
+            if find_id_broken:
+                server = nova.servers.find(name=server_name)
+            else:
+                server = nova.servers.find(id=vm_stub.id)
             status = getattr(server, "status", "unknown")
             if status.lower() == "active":
                 log.info("booted server " + server.id)

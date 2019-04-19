@@ -14,6 +14,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import os
 import signal
 import string
 import random
@@ -26,6 +27,8 @@ from neutronclient.v2_0 import client as neutron_client
 from cinderclient import client as cinder_client
 
 from resalloc_openstack.env_credentials import session
+
+find_id_broken = 'NOVA_BROKEN_SERVER_FIND_ID' in os.environ
 
 neutron = neutron_client.Client(session=session)
 nova = nova_client.Client(2, session=session)
@@ -132,7 +135,11 @@ class Server(OSObject):
         # Wait for the server shut-down before we attempt to delete volumes.
         for _ in range(5):
             sleep(5)
-            if not self.client.servers.findall(id=self.id):
+
+            key = 'name' if find_id_broken else 'id'
+            value = self.nova_o.name if find_id_broken else self.id
+            args = {key: value}
+            if not self.client.servers.findall(**args):
                 return
 
         raise Exception("delete request accepted, but errored")
