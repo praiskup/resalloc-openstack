@@ -15,7 +15,7 @@
 
 Name:       %srcname
 Summary:    Resource allocator scripts for OpenStack
-Version:    4
+Version:    5
 Release:    1%{?dist}
 License:    GPLv2+
 URL:        https://github.com/praiskup/resalloc-openstack
@@ -70,6 +70,9 @@ Resource allocator spawner/terminator scripts for OpenStack
 
 
 %changelog
+* Wed Jun 12 2019 Pavel Raiskup <praiskup@redhat.com> - 5-1
+- compat for older novaclient
+
 * Fri Apr 19 2019 Pavel Raiskup <praiskup@redhat.com> - 4-1
 - work-around broken fedorainfracloud:
   https://pagure.io/fedora-infrastructure/issue/7711
