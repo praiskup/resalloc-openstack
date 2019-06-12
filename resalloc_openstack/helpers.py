@@ -115,7 +115,12 @@ class Server(OSObject):
     def init(self, client, id_or_name):
         self.client = client
 
-        srvs = client.servers.findall(name=id_or_name)
+        srvs = None
+        try:
+            srvs = client.servers.findall(name=id_or_name)
+        except novaclient.exceptions.NotFound:
+            pass
+
         if srvs:
             self.id = srvs[0].id
             self.nova_o = srvs[0]
@@ -139,7 +144,15 @@ class Server(OSObject):
             key = 'name' if find_id_broken else 'id'
             value = self.nova_o.name if find_id_broken else self.id
             args = {key: value}
-            if not self.client.servers.findall(**args):
+
+            all_servers = None
+            try:
+                all_servers = self.client.servers.findall(**args)
+            # Older nova clients raised exception.
+            except novaclient.exceptions.NotFound:
+                pass
+
+            if not all_servers:
                 return
 
         raise Exception("delete request accepted, but errored")
