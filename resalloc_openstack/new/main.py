@@ -65,7 +65,14 @@ def main():
                     nic_dict[k] = v
                 nics.append(nic_dict)
 
-        image = nova.glance.find_image(args.image)
+        try:
+            image = nova.glance.find_image(args.image)
+        except AttributeError:
+            # older novaclient
+            try:
+                image = nova.images.get(args.image)
+            except:
+                image = nova.images.find(name=args.image)
 
         vm_stub = nova.servers.create(
             server_name,
