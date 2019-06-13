@@ -16,7 +16,7 @@
 Name:       %srcname
 Summary:    Resource allocator scripts for OpenStack
 Version:    5
-Release:    1%{?dist}
+Release:    2%{?dist}
 License:    GPLv2+
 URL:        https://github.com/praiskup/resalloc-openstack
 BuildArch:  noarch
@@ -31,7 +31,7 @@ Requires: %pythonpfx-keystoneauth1
 Requires: %pythonpfx-neutronclient
 Requires: %pythonpfx-novaclient
 
-Source0:    %{name}-%{version}.tar.gz
+Source0: https://github.com/praiskup/%name/releases/download/v%version/%name-%version.tar.gz
 
 %description
 Resource allocator spawner/terminator scripts for OpenStack
@@ -70,6 +70,9 @@ Resource allocator spawner/terminator scripts for OpenStack
 
 
 %changelog
+* Thu Jun 13 2019 Pavel Raiskup <praiskup@redhat.com> - 5-2
+- start using the released tarball
+
 * Wed Jun 12 2019 Pavel Raiskup <praiskup@redhat.com> - 5-1
 - compat for older novaclient
 
