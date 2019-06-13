@@ -34,7 +34,14 @@ Requires: %pythonpfx-novaclient
 Source0: https://github.com/praiskup/%name/releases/download/v%version/%name-%version.tar.gz
 
 %description
-Resource allocator spawner/terminator scripts for OpenStack
+Resource allocator spawner/terminator scripts for OpenStack virtual machines,
+designed so they either allocate all the sub-resources, or nothing (in case of
+some failure).  This is especially useful if working with older OpenStack
+deployments which all the time keep orphaned servers, floating IPs, volumes,
+etc. dangling around.
+
+These scripts are primarily designed to be used with resalloc-server.rpm, but in
+general might be used separately.
 
 
 %prep
@@ -72,6 +79,7 @@ Resource allocator spawner/terminator scripts for OpenStack
 %changelog
 * Thu Jun 13 2019 Pavel Raiskup <praiskup@redhat.com> - 5-2
 - start using the released tarball
+- more descriptive %%description
 
 * Wed Jun 12 2019 Pavel Raiskup <praiskup@redhat.com> - 5-1
 - compat for older novaclient
