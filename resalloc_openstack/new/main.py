@@ -97,6 +97,10 @@ def main():
             if status.lower() == "active":
                 log.info("booted server " + server.id)
                 break
+
+            if status.lower() == "error":
+                raise Exception("server errored while being booted")
+
             log.debug("status: " + str(status))
             sleep(3)
 
