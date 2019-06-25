@@ -15,8 +15,8 @@
 
 Name:       %srcname
 Summary:    Resource allocator scripts for OpenStack
-Version:    5
-Release:    2%{?dist}
+Version:    6
+Release:    1%{?dist}
 License:    GPLv2+
 URL:        https://github.com/praiskup/resalloc-openstack
 BuildArch:  noarch
