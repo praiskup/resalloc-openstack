@@ -15,7 +15,7 @@
 
 Name:       %srcname
 Summary:    Resource allocator scripts for OpenStack
-Version:    6
+Version:    7
 Release:    1%{?dist}
 License:    GPLv2+
 URL:        https://github.com/praiskup/resalloc-openstack
@@ -77,45 +77,5 @@ general might be used separately.
 
 
 %changelog
-* Thu Jun 13 2019 Pavel Raiskup <praiskup@redhat.com> - 5-2
-- start using the released tarball
-- more descriptive %%description
-
-* Wed Jun 12 2019 Pavel Raiskup <praiskup@redhat.com> - 5-1
-- compat for older novaclient
-
-* Fri Apr 19 2019 Pavel Raiskup <praiskup@redhat.com> - 4-1
-- work-around broken fedorainfracloud:
-  https://pagure.io/fedora-infrastructure/issue/7711
-
-* Thu Apr 18 2019 Pavel Raiskup <praiskup@redhat.com> - 3-2
-- add missing Requires
-
-* Thu Apr 18 2019 Pavel Raiskup <praiskup@redhat.com> - 3-1
-- more solid VM termination
-- dump verbosely what is going on
-
-* Sat Mar 23 2019 Pavel Raiskup <praiskup@redhat.com> - 2-1
-- support v3 connection API
-
-* Wed Oct 31 2018 Pavel Raiskup <praiskup@redhat.com> - 1-1
-- rebuild for Python 3.7
-
-* Tue Jan 30 2018 Pavel Raiskup <praiskup@redhat.com> - 1.dev0-0
-- first tagged release
-
-* Wed Jan 10 2018 Pavel Raiskup <praiskup@redhat.com> - 0.dev0-4
-- add 'resalloc-openstack --nic' option
-- 'resalloc-openstack-new --image' accepts image name, too
-
-* Fri Oct 13 2017 Pavel Raiskup <praiskup@redhat.com> - 0.dev0-3
-- fix the volume attaching
-
-* Thu Oct 05 2017 Pavel Raiskup <praiskup@redhat.com> - 0.dev0-2
-- new: add --key-pair-id option
-
-* Thu Oct 05 2017 Pavel Raiskup <praiskup@redhat.com> - 0.dev0-1
-- add handler explicitly for python2
-
-* Wed Oct 04 2017 Pavel Raiskup <praiskup@redhat.com> - 0.dev0-0
-- initial build
+* Wed Jul 17 2019 Pavel Raiskup <praiskup@redhat.com>
+- no more rpm changelog in upstream spec file
