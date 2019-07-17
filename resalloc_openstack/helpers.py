@@ -62,6 +62,7 @@ class OSObject(object):
     def best_effort_delete(self):
         if self.attempt > 5:
             # what else we can do ...
+            self.force_delete()
             return True
 
         self.attempt += 1
@@ -75,7 +76,17 @@ class OSObject(object):
         return False
 
     def delete(self):
+        """
+        This method is called several times if any exception is raised.
+        """
         raise NotImplementedError
+
+    def force_delete(self):
+        """
+        This method is called only once, as a last resort.  All exceptions are
+        ignored.
+        """
+        pass
 
     def init(self):
         raise NotImplementedError
@@ -166,13 +177,19 @@ class Volume(OSObject):
         self.client = client
 
     def delete(self):
-        # TODO:
+        self.nova_o.detach()
+        self.client.volumes.delete(self.id)
+
+    def force_delete(self):
         try:
             self.nova_o.detach()
         except:
-            log.debug("can't detach volume " + self.id)
+            log.debug("ignorring volume detach problems")
 
-        self.client.volumes.delete(self.id)
+        try:
+            self.client.volumes.delete(self.id)
+        except:
+            log.debug("ignorring volume delete problems")
 
 
 class GarbageCollector(object):
