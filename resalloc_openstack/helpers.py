@@ -184,12 +184,12 @@ class Volume(OSObject):
         try:
             self.nova_o.detach()
         except:
-            log.debug("ignorring volume detach problems")
+            log.debug("ignoring volume detach problems")
 
         try:
             self.client.volumes.delete(self.id)
         except:
-            log.debug("ignorring volume delete problems")
+            log.debug("ignoring volume delete problems")
 
 
 class GarbageCollector(object):
