@@ -1,0 +1,74 @@
+#! /usr/bin/python3
+
+# Copyright (C) 2021 Red Hat, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+"""
+Sometimes happens that VM ends-up in some inconsistent state, and we can not
+remove it (error state, etc.).  After some time (days?) the OpenStack
+environment gets fixed - and this script, when run periodically, can remove the
+old instances.
+"""
+
+
+import datetime
+import logging
+import subprocess
+import os
+from dateutil.parser import parse
+from resalloc_openstack.helpers import nova
+
+OLDER_THAN = 36000
+
+
+def _main():
+    log = logging.getLogger(__name__)
+    hdlr = logging.StreamHandler()
+    log.addHandler(hdlr)
+    log.setLevel(logging.INFO)
+
+    match_pattern = os.environ["OS_CLEANUP_VM_PATTERN"]
+    now = datetime.datetime.utcnow()
+    now = now.replace(tzinfo=datetime.timezone.utc)
+
+    for server in nova.servers.list():
+
+        if match_pattern not in server.name:
+            log.debug("Server %s doesn't match %s pattern",
+                      server.name, match_pattern)
+            continue
+
+        created_at = parse(server.created)
+        if (now - created_at).total_seconds() < OLDER_THAN:
+            log.debug("Server %s is not old enough", server.name)
+            continue
+
+        output = subprocess.check_output(["resalloc-maint", "foreach-resource"])
+        output = output.decode("utf-8")
+        known_resources = output.split()
+
+        if server.name in known_resources:
+            log.debug("Server %s is known", server.name)
+            continue
+
+        log.info("Removing %s", server.name)
+        subprocess.call([
+            "resalloc-openstack-delete", server.name,
+            "--delete-everything"])
+
+
+if __name__ == "__main__":
+    _main()

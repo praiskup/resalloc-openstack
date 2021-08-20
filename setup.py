@@ -57,6 +57,7 @@ setup(
         'bin/resalloc-openstack-new',
         'bin/resalloc-openstack-delete',
         'bin/resalloc-openstack-cleanup-broken-images',
+        'bin/resalloc-openstack-cleanup-orphaned-instances',
     ],
     install_requires=get_requirements(),
     cmdclass={
