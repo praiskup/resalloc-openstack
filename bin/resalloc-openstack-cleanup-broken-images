@@ -1,0 +1,70 @@
+#! /usr//bin/python3
+
+"""
+From time to time it happens that, despite we try our best (in allocation and
+termination scripts), some volume stays available in the OpenStack volume list
+and eats quota.  So we periodically try to run this script to release the
+storage.
+"""
+
+import datetime
+import logging
+import os
+
+from dateutil.parser import parse
+
+from keystoneauth1 import loading, session as os_session
+from cinderclient import client as cinder_client
+from cinderclient.exceptions import ClientException
+
+
+def _main():
+    log = logging.getLogger()
+    match_pattern = os.environ["OS_CLEANUP_CINDER_PATTERN"]
+
+    log = logging.getLogger(__name__)
+    hdlr = logging.StreamHandler()
+    log.addHandler(hdlr)
+    log.setLevel(logging.DEBUG)
+
+    loader = loading.get_plugin_loader('password')
+
+    auth = loader.load_from_options(
+        auth_url=os.environ["OS_AUTH_URL"],
+        username=os.environ["OS_USERNAME"],
+        password=os.environ["OS_PASSWORD"],
+        user_domain_name=os.environ["OS_USER_DOMAIN_NAME"],
+        project_domain_id=os.environ["OS_PROJECT_DOMAIN_ID"],
+        project_name=os.environ["OS_PROJECT_NAME"])
+
+    session = os_session.Session(auth=auth)
+    cinder = cinder_client.Client(3, session=session)
+
+    for volume in cinder.volumes.list():
+        name = volume.name
+        if not match_pattern in name:
+            continue
+        log.debug("checking %s", volume.name)
+
+        now = datetime.datetime.utcnow()
+        created_at = parse(volume.created_at)
+
+        older_than = 3600
+        if (now - created_at).total_seconds() < older_than:
+            log.debug("%s is not older than %ss: %s", volume.name,
+                      older_than, volume.created_at)
+            continue
+
+        if volume.status == "in-use":
+            log.debug("%s is is in use", volume.name)
+            continue
+
+        log.info("Deleting orphaned volume: %s, created_at=%s, status=%s",
+                 volume.name, volume.created_at, volume.status)
+        try:
+            cinder.volumes.delete(volume)
+        except ClientException:
+            log.exception("Request to delete %s failed", volume.name)
+
+if __name__ == "__main__":
+    _main()

@@ -53,7 +53,11 @@ setup(
     url='https://github.com/praiskup/resalloc-openstack',
     platforms=['any'],
     packages=find_packages(),
-    scripts=['bin/resalloc-openstack-new', 'bin/resalloc-openstack-delete'],
+    scripts=[
+        'bin/resalloc-openstack-new',
+        'bin/resalloc-openstack-delete',
+        'bin/resalloc-openstack-cleanup-broken-images',
+    ],
     install_requires=get_requirements(),
     cmdclass={
         'build_manpages': build_manpages,
