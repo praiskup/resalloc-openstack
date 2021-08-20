@@ -31,7 +31,7 @@ import os
 from dateutil.parser import parse
 from resalloc_openstack.helpers import nova
 
-OLDER_THAN = 36000
+OLDER_THAN = 3600
 
 
 def _main():
