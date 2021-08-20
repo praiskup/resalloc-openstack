@@ -15,7 +15,7 @@
 
 Name:       %srcname
 Summary:    Resource allocator scripts for OpenStack
-Version:    7
+Version:    @VERSION@
 Release:    1%{?dist}
 License:    GPLv2+
 URL:        https://github.com/praiskup/resalloc-openstack
@@ -31,7 +31,7 @@ Requires: %pythonpfx-keystoneauth1
 Requires: %pythonpfx-neutronclient
 Requires: %pythonpfx-novaclient
 
-Source0: https://github.com/praiskup/%name/releases/download/v%version/%name-%version.tar.gz
+Source0: https://github.com/praiskup/%name/releases/download/v%version/%name-@TARBALL_VERSION@.tar.gz
 
 %description
 Resource allocator spawner/terminator scripts for OpenStack virtual machines,
@@ -45,7 +45,7 @@ general might be used separately.
 
 
 %prep
-%setup -q
+%setup -q -n %name-@TARBALL_VERSION@
 
 
 %build

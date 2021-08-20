@@ -1,8 +1,10 @@
 project = resalloc-openstack
 
-project_version = \
+tarball_version = \
 	cd .. ; \
 	python setup.py --version
+
+project_version = ./spec-version
 
 generate_tarball = \
 	cd .. ; \
@@ -27,10 +29,24 @@ spec = $(project).spec
 
 all: srpm
 
+.PHONY: $(spec)
+$(spec):
+	version=$(shell $(project_version)) ; \
+	tbversion=$(shell $(tarball_version)) ; \
+	replace=%version ; \
+	if test "$$version" != "$$tbversion" ; then \
+	    replace=$$tbversion ; \
+	fi; \
+	rm -f $(spec); \
+	sed -e "s/@VERSION@/$$version/" \
+	    -e "s/@TARBALL_VERSION@/$$replace/" \
+	    $(spec).tpl > $(spec) ; \
+	chmod -w $(spec)
+
 $(tarball): clean
 	$(generate_tarball)
 
-srpm: $(tarball)
+srpm: $(tarball) $(spec)
 	rm -rf *.src.rpm
 	rpmbuild -bs $(rpmbuild_options) $(spec)
 
