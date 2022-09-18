@@ -33,6 +33,7 @@ find_id_broken = 'NOVA_BROKEN_SERVER_FIND_ID' in os.environ
 neutron = neutron_client.Client(session=session)
 nova = nova_client.Client(2, session=session)
 cinder = cinder_client.Client(2, session=session)
+cinder3 = cinder_client.Client(3, session=session)
 
 def get_log(name):
     level = logging.DEBUG
