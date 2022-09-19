@@ -194,9 +194,21 @@ class Volume(OSObject):
 
 
 class GarbageCollector(object):
+    """
+    Construct a sorted list of cleanup actions executed upon a request, or
+    automatically upon a failure.
+    """
     todo = {}
-    def add(self, item, obj):
-        self.todo[item] = obj
+
+    def add(self, identifier, cleaner_obj):
+        """
+        Add a new cleanup action (CLEANER_OBJ), identified by IDENTIFIER.
+        IDENTIFIER is only used to sort the cleaner objects correctly
+        (alphabetically, by given identifiers - not in the order they are
+        added).  So the IDENTIFIERs are mostly artificially picked strings to
+        guarantee the correct order of cleanup actions.
+        """
+        self.todo[identifier] = cleaner_obj
 
     def do(self):
         signal.signal(signal.SIGINT, signal.SIG_IGN)
