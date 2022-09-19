@@ -1,4 +1,4 @@
-# Copyright (C) 2017 Red Hat, Inc.
+# Copyright (C) 2017-2022 Red Hat, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,16 +27,17 @@ log = get_log(__name__)
 from keystoneauth1.exceptions import ConnectionError
 
 def gather_tasks(gc):
+    server = None
     args = parser.parse_args()
 
     try:
         server = Server(nova, args.name)
+        gc.add('10_server', server)
     except novaclient.exceptions.NotFound:
         log.error('vm %s not found', args.name)
-        return False
 
 
-    if args.delete_everything:
+    if server and args.delete_everything:
         # Find the first floating ip address.
         addresses = []
         for key in server.nova_o.addresses:
@@ -57,18 +58,28 @@ def gather_tasks(gc):
                 gc.add('01_ip_' + address,
                        FloatingIP(client=neutron, ip=a))
 
+    if args.delete_everything:
         for volume in cinder.volumes.list():
+
+            # Even though the corresponding server has not been found above,
+            # we try to remove (not attached) volumes that appear to be the
+            # former attachments.
             if not volume.attachments:
+                if volume.name.startswith(args.name):
+                    gc.add('05_volume_' + volume.id,
+                           Volume(cinder, volume))
                 continue
 
-            # FIXME: do we need to check IDs != 0?
+            # Check the volumes attached to the deleted instance.  We'd remove
+            # all the attachments, with any name.
+            if not server:
+                continue
             if volume.attachments[0]['server_id'] != server.id:
                 continue
 
             gc.add('05_volume_' + volume.id,
                    Volume(cinder, volume))
 
-    gc.add('10_server', server)
 
 
 def main():
