@@ -40,7 +40,6 @@ def get_parser():
     parser.add_argument(
         "--pool",
         default=os.getenv("RESALLOC_POOL_ID"),
-        required=True,
         help="Choose the pool name, alternatively $RESALLOC_POOL_ID",
     )
 
@@ -53,6 +52,10 @@ def main():
     log.addHandler(hdlr)
     log.setLevel(logging.INFO)
     args = get_parser().parse_args()
+
+    if not args.pool:
+        log.fatal("$RESALLOC_POOL_ID env var or --pool required")
+        sys.exit(1)
 
     if args.pool.endswith("_"):
         log.fatal("Pool name should not end with underscore: %s", args.pool)
