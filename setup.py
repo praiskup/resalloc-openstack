@@ -44,7 +44,7 @@ Resource allocator spawner/terminator scripts for OpenStack
 
 setup(
     name=project,
-    version='9.1',
+    version='9.2',
     description='Spawning/terminating scripts for openstack',
     long_description=long_description,
     author='Pavel Raiskup',
