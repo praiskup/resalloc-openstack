@@ -70,13 +70,28 @@ def gather_tasks(gc):
                            Volume(cinder, volume))
                 continue
 
-            # Check the volumes attached to the deleted instance.  We'd remove
-            # all the attachments, with any name.
+            # Volume has some attachment.  If we don't have a server found, we
+            # mostly don't care about this volume.  But sometimes happens that
+            # the volume stays attached to a non-existent instance.  Try to
+            # cleanup such a volume.
             if not server:
-                continue
-            if volume.attachments[0]['server_id'] != server.id:
+                if volume.name.startswith(args.name):
+                    # There must be a reason we haven't found the server above.
+                    try:
+                        _ = Server(nova, volume.attachments[0]['server_id'])
+                        # The attached-to server was found.  Rather keep the
+                        # volume.
+                    except novaclient.exceptions.NotFound:
+                        # OpenStack bug.  Remove the volume, the attachment
+                        # doesn't exist.
+                        gc.add('05_volume_' + volume.id,
+                               Volume(cinder, volume))
                 continue
 
+            # Check the volumes attached to the deleted instance.  We'd remove
+            # all the attachments, with any name.
+            if volume.attachments[0]['server_id'] != server.id:
+                continue
             gc.add('05_volume_' + volume.id,
                    Volume(cinder, volume))
 
