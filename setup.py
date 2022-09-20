@@ -44,7 +44,7 @@ Resource allocator spawner/terminator scripts for OpenStack
 
 setup(
     name=project,
-    version='9',
+    version='9.1',
     description='Spawning/terminating scripts for openstack',
     long_description=long_description,
     author='Pavel Raiskup',
@@ -58,6 +58,7 @@ setup(
         'bin/resalloc-openstack-delete',
         'bin/resalloc-openstack-cleanup-broken-images',
         'bin/resalloc-openstack-cleanup-orphaned-instances',
+        'bin/resalloc-openstack-list',
     ],
     install_requires=get_requirements(),
     cmdclass={
