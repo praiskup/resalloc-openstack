@@ -24,6 +24,7 @@ BuildArch:  noarch
 
 BuildRequires: %pythonpfx-devel
 BuildRequires: %pythonpfx-setuptools
+BuildRequires: %python-argparse-manpage
 
 Requires: %pythonpfx-cinderclient
 Requires: %pythonpfx-glanceclient
