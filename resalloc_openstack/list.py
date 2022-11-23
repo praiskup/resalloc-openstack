@@ -20,7 +20,7 @@ import os
 import re
 import sys
 
-from resalloc_openstack.helpers import nova, cinder3
+from resalloc_openstack.helpers import nova, cinder
 
 DESCRIPTION = """
 List a set of OpenStack VMs given the --pool NAME (starting part of the VM
@@ -67,7 +67,7 @@ def main():
         if server.name.startswith(args.pool):
             servers.add(server.name)
 
-    for volume in cinder3.volumes.list():
+    for volume in cinder.volumes.list():
         if volume.name.startswith(args.pool):
             # for pool
             # copr_vm_devel_psi_os
