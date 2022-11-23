@@ -15,22 +15,9 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import os, sys
 from setuptools import setup, find_packages
-from os import listdir, path
 
-# For the manual pages generator.
-from setuptools.command.build_py import build_py
-from setuptools.command.install import install
-try:
-    sys.path = [os.path.join(os.getcwd(), 'build_manpages')] + sys.path
-    from build_manpages.build_manpages \
-    import build_manpages, get_build_py_cmd, get_install_cmd
-except:
-    print("=======================================")
-    print("Use 'git submodule update --init' first")
-    print("=======================================")
-    raise
+from build_manpages import build_manpages, get_build_py_cmd, get_install_cmd
 
 project = "resalloc-openstack"
 
@@ -63,7 +50,7 @@ setup(
     install_requires=get_requirements(),
     cmdclass={
         'build_manpages': build_manpages,
-        'build_py': get_build_py_cmd(build_py),
-        'install': get_install_cmd(install),
+        'build_py': get_build_py_cmd(),
+        'install': get_install_cmd(),
     },
 )
