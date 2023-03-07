@@ -90,3 +90,10 @@ parser.add_argument(
     help="comma-separated, key=value,foo=baz arguments (see "
          "nova.servers.create(nics=...) help",
 )
+
+parser.add_argument(
+    "--security-group",
+    action="append",
+    dest="security_groups",
+    help="A security group name",
+)

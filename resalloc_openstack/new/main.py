@@ -27,6 +27,8 @@ from subprocess import check_call
 log = get_log(__name__)
 
 gc = GarbageCollector()
+
+
 def main():
     args = parser.parse_args()
     server_name = args.name or random_id()
@@ -80,6 +82,7 @@ def main():
             args.flavor,
             key_name=key,
             nics=nics,
+            security_groups=args.security_groups or None,
         )
 
         if find_id_broken:
