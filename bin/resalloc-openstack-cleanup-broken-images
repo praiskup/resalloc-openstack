@@ -12,10 +12,10 @@ import logging
 import os
 
 from dateutil.parser import parse
-
-from keystoneauth1 import loading, session as os_session
-from cinderclient import client as cinder_client
 from cinderclient.exceptions import ClientException
+
+from resalloc_openstack.env_credentials import session
+from resalloc_openstack.helpers import cinder
 
 
 def _main():
@@ -26,19 +26,6 @@ def _main():
     hdlr = logging.StreamHandler()
     log.addHandler(hdlr)
     log.setLevel(logging.DEBUG)
-
-    loader = loading.get_plugin_loader('password')
-
-    auth = loader.load_from_options(
-        auth_url=os.environ["OS_AUTH_URL"],
-        username=os.environ["OS_USERNAME"],
-        password=os.environ["OS_PASSWORD"],
-        user_domain_name=os.environ["OS_USER_DOMAIN_NAME"],
-        project_domain_id=os.environ["OS_PROJECT_DOMAIN_ID"],
-        project_name=os.environ["OS_PROJECT_NAME"])
-
-    session = os_session.Session(auth=auth)
-    cinder = cinder_client.Client(3, session=session)
 
     for volume in cinder.volumes.list():
         name = volume.name
