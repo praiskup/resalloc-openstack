@@ -17,9 +17,9 @@
 import os
 from keystoneauth1 import loading, session
 
-loader = loading.get_plugin_loader('password')
 
 if 'OS_TENANT_ID' in os.environ:
+    loader = loading.get_plugin_loader('password')
     # v2 config, since OS_TENANT_ID is not in v3 anymore
     auth = loader.load_from_options(
         auth_url=os.environ["OS_AUTH_URL"],
@@ -28,6 +28,7 @@ if 'OS_TENANT_ID' in os.environ:
         project_id=os.environ["OS_TENANT_ID"])
 elif 'OS_PROJECT_NAME' in os.environ:
     # v3 config
+    loader = loading.get_plugin_loader('password')
     auth = loader.load_from_options(
         auth_url=os.environ["OS_AUTH_URL"],
         username=os.environ["OS_USERNAME"],
@@ -35,6 +36,13 @@ elif 'OS_PROJECT_NAME' in os.environ:
         user_domain_name=os.environ["OS_USER_DOMAIN_NAME"],
         project_domain_id=os.environ["OS_PROJECT_DOMAIN_ID"],
         project_name=os.environ["OS_PROJECT_NAME"])
+elif 'OS_APPLICATION_CREDENTIAL_ID' in os.environ:
+    loader = loading.get_plugin_loader('v3applicationcredential')
+    auth = loader.load_from_options(
+        auth_url=os.environ["OS_AUTH_URL"],
+        application_credential_id=os.environ["OS_APPLICATION_CREDENTIAL_ID"],
+        application_credential_secret=os.environ["OS_APPLICATION_CREDENTIAL_SECRET"],
+    )
 else:
     raise Exception("No credentials provided in environment")
 
