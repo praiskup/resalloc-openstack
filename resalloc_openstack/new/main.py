@@ -17,12 +17,12 @@
 import os
 from time import sleep
 
+from subprocess import check_call, DEVNULL
+
 from .arg_parser import parser
-from resalloc_openstack.env_credentials import session
 from resalloc_openstack.helpers \
         import FloatingIP, random_id, Server, get_log, Volume, GarbageCollector
 from resalloc_openstack.helpers import cinder, nova, neutron, find_id_broken
-from subprocess import check_call
 
 log = get_log(__name__)
 
@@ -128,7 +128,7 @@ def main():
             env = os.environ
             env['RESALLOC_OS_NAME'] = server_name
             env['RESALLOC_OS_IP'] = ipaddr
-            check_call(args.command, env=env, shell=True)
+            check_call(args.command, env=env, shell=True, stdin=DEVNULL)
 
         if args.print_ip:
             print(ipaddr)
