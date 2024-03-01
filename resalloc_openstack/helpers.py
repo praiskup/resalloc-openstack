@@ -75,7 +75,7 @@ class OSObject(object):
         self.init(*args, **kwargs)
 
     def best_effort_delete(self):
-        if self.attempt > self.max_delete_attempts:
+        if self.attempt >= self.max_delete_attempts:
             # what else we can do ...
             self.force_delete()
             return True
