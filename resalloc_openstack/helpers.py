@@ -25,6 +25,7 @@ from novaclient import client as nova_client
 import novaclient.exceptions
 from neutronclient.v2_0 import client as neutron_client
 from cinderclient import client as cinder_client
+import cinderclient.exceptions
 
 from resalloc_openstack.env_credentials import session
 
@@ -57,14 +58,24 @@ def random_id():
 
 
 class OSObject(object):
+    max_delete_attempts = 5
+    ignore_delete_errors = False
     attempt = 0
 
+    def _handle_optional_arg(self, opt_arg, kwargs):
+        opt_val = kwargs.pop(opt_arg, None)
+        if opt_val is None:
+            return
+        setattr(self, opt_arg, opt_val)
+
     def __init__(self, *args, **kwargs):
-        log.debug("initializing " + str(self.__class__))
+        log.debug("initializing %s", self.__class__)
+        self._handle_optional_arg("max_delete_attempts", kwargs)
+        self._handle_optional_arg("ignore_delete_errors", kwargs)
         self.init(*args, **kwargs)
 
     def best_effort_delete(self):
-        if self.attempt > 5:
+        if self.attempt > self.max_delete_attempts:
             # what else we can do ...
             self.force_delete()
             return True
@@ -177,12 +188,34 @@ class Server(OSObject):
 class Volume(OSObject):
     def init(self, client, volume):
         self.id = volume.id
+        self.info_str = "{} ({})".format(volume.name, volume.id)
         self.nova_o = volume
         self.client = client
 
     def delete(self):
-        self.nova_o.detach()
-        self.client.volumes.delete(self.id)
+        ignored_exceptions = (
+            novaclient.exceptions.ClientException,
+            cinderclient.exceptions.ClientException,
+        )
+
+        try:
+            self.nova_o.detach()
+        except ignored_exceptions:
+            if not self.ignore_delete_errors:
+                raise
+            log.info("Failed to detach %s, ignored for now.",
+                     self.info_str)
+
+        try:
+            self.client.volumes.delete(self.id)
+        except novaclient.exceptions.NotFound:
+            # has previous attempt-to-remove succeeded?
+            log.debug("Volume %s not found", self.info_str)
+        except ignored_exceptions:
+            if not self.ignore_delete_errors:
+                raise
+            log.info("Failed remove %s, ignored for now.", self.info_str)
+
 
     def force_delete(self):
         try:

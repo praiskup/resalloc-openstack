@@ -46,7 +46,10 @@ def main():
             volume_name = "{0}_{1}".format(server_name, number)
             volume = cinder.volumes.create(size=int(v), name=volume_name)
             volumes.append(volume)
-            gc.add('05_' + volume_name, Volume(cinder, volume))
+            gc.add('15_' + volume_name, Volume(cinder, volume))
+            gc.add('05_' + volume_name, Volume(cinder, volume,
+                                               ignore_delete_errors=True,
+                                               max_delete_attempts=1))
 
         flavor = nova.flavors.find(id=args.flavor)
 
