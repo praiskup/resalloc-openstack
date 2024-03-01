@@ -93,8 +93,9 @@ def gather_tasks(gc):
             if volume.attachments[0]['server_id'] != server.id:
                 continue
             gc.add('05_volume_' + volume.id,
-                   Volume(cinder, volume))
-
+                   Volume(cinder, volume, ignore_delete_errors=True,
+                          max_delete_attempts=1))
+            gc.add('15_volume_' + volume.id, Volume(cinder, volume))
 
 
 def main():
