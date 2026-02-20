@@ -118,6 +118,9 @@ def main():
         else:
             for net_id in server.addresses:
                 for ip in server.addresses[net_id]:
+                    if ip.get("version") != 4:
+                        log.info("Skipping ipv6: %s", ip['addr'])
+                        continue
                     ipaddr = ip['addr']
                     break
                 if ipaddr:
