@@ -86,6 +86,7 @@ def main():
             key_name=key,
             nics=nics,
             security_groups=args.security_groups or None,
+            config_drive=True,
         )
 
         if find_id_broken:
